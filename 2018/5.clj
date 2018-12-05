@@ -21,18 +21,38 @@
 
 
 (defn react [a b]
-  (if (inverse-units? a b)
-    '()
-    (list a b)))
+  (cond
+    (nil? a) (list b)
+    (nil? b) (list a)
+    :else (if (inverse-units? a b)
+            '()
+            (list a b))))
 
 (react \a \A) ; =>  '()
 (react \a \B) ; => '(\a \B)
+(react \a nil)
+(react nil \x)
 
 (use 'clojure.tools.trace)
 
-(defn reaction-pass [pstring]
-  (reduce react pstring))
+(conj '() '())
 
+
+
+(defn reaction-pass [pstring]
+  (apply str (if (empty? pstring)
+               '()
+               (if (= 1 (count pstring))
+                 (seq pstring)
+                 (let [[a b & remaining] pstring]
+                   (let [first-reaction (react a b)]
+                     (condp = (count first-reaction)
+                       0 (reaction-pass remaining)
+                       1 first-reaction
+                       2 (cons a (reaction-pass (cons b remaining))))))))))
+
+(reaction-pass "aAb")
+(reaction-pass "aaAb")
 
 ; (defn polymer-reaction [pstring]
 ;   (if (<= (count pstring) 1)
@@ -43,16 +63,16 @@
 ;         (polymer-reaction (cons u1 (polymer-reaction (rest all))))))))
 
 (defn polymer-reaction [pstring]
-  (println "starting" pstring)
-  (loop [product (reaction-pass pstring)]
-    (println "what up" product)
-    (if (<= (count pstring) 2)
-      pstring
-      (if (= product pstring)
-        pstring
-        (recur (reaction-pass pstring)))) ))
+  (loop [orig pstring
+         product (reaction-pass pstring)]
+    (if (< (count orig) 2)
+      orig
+      (if (= product orig)
+        orig
+        (recur product (reaction-pass product)))) ))
 
 (polymer-reaction "aAb")
 (polymer-reaction "abBA")
 (polymer-reaction "dabAcCaCBAcCcaDA") ; => dabCBAcaDA ?
 
+(count (polymer-reaction input))
