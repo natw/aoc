@@ -1,41 +1,50 @@
 (ns aoc)
 
-(def input (first (clojure.string/split-lines (slurp "inputs/5.txt"))))
+(def input (map str (seq (first (clojure.string/split-lines (slurp "inputs/5.txt"))))))
 
 (first input)
 
 (defn abs [n] (max n (-' n)))
 
+(defn str2int [a] (int (first (seq a))))
 (defn inverse-units? [a b] 
   (and (not= a b)
-       (= 32 (abs (- (int a) (int b))))))
+       (= 32 (abs (- (str2int a) (str2int b))))))
 
+(first (seq "a"))
 ; true
-(inverse-units? \a \A)
-(inverse-units? \b \B)
+(inverse-units? "a" "A")
+(inverse-units? "b" "B")
 
 ; false
-(inverse-units? \a \a)
-(inverse-units? \a \b)
-(inverse-units? \a \B)
+(inverse-units? "a" "a")
+(inverse-units? "a" "b")
+(inverse-units? "a" "B")
 
+(str "a" "b")
 
-(defn react [a b]
+(defn react [as b]
+  (let [a (last as)]
   (cond
-    (nil? a) (list b)
-    (nil? b) (list a)
+    (empty? a) b
+    (empty? b) a
     :else (if (inverse-units? a b)
-            '()
-            (list a b))))
+            ""
+            (str a b)))))
 
-(react \a \A) ; =>  '()
-(react \a \B) ; => '(\a \B)
-(react \a nil)
-(react nil \x)
 
-(use 'clojure.tools.trace)
+(defn pass [polymer]
+  (loop [processed ""
+         remaining polymer]
+    (recur (react ))
+    (if (< (count reacted) (count orig))
+      (recur )
+      )
 
-(conj '() '())
+
+
+    
+    ))
 
 
 
