@@ -6,45 +6,56 @@
 
 (defn abs [n] (max n (-' n)))
 
-(defn str2int [a] (int (first (seq a))))
-(defn inverse-units? [a b] 
+(defn inverse-units? [a b]
   (and (not= a b)
-       (= 32 (abs (- (str2int a) (str2int b))))))
+       (= 32 (abs (- (int a) (int b))))))
 
-(first (seq "a"))
-; true
-(inverse-units? "a" "A")
-(inverse-units? "b" "B")
 
-; false
-(inverse-units? "a" "a")
-(inverse-units? "a" "b")
-(inverse-units? "a" "B")
-
-(str "a" "b")
-
-(defn react [as b]
-  (let [a (last as)]
+(defn react [a b]
   (cond
-    (empty? a) b
-    (empty? b) a
+    (nil? a) (str b)
+    (nil? b) (str a)
     :else (if (inverse-units? a b)
             ""
-            (str a b)))))
+            (str a b))))
+
+(= "" (react \a \A))
+(= "aa" (react \a \a))
+(= "x" (react nil \x))
 
 
 (defn pass [polymer]
-  (loop [processed ""
-         remaining polymer]
-    (recur (react ))
-    (if (< (count reacted) (count orig))
-      (recur )
+  (let [processed (atom "")]
+    (loop [remaining polymer]
+      (if (empty? remaining)
+        @processed
+
+
+        (let [reacted (react (last @processed) (first remaining))]
+          (swap! processed str reacted)
+          (println remaining)
+          (recur (rest polymer))
+
+          ))
       )
-
-
-
-    
     ))
+
+(defn pass2 [polymer]
+  (loop [x (str (first polymer))
+         remaining (rest polymer)]
+    (println "x: " x " remaining: " remaining)
+    (if (<= 2 (count remaining))
+      (let [product (react (last x) (first remaining))
+            untouched (rest remaining)]
+        (println "product: " product " empty? " (empty? product))
+        (println "untouched:" untouched)
+        (if (empty? product)
+          (recur (str (butlast x) (first untouched)) (rest untouched) )
+          (recur (str x product) untouched)))
+      x
+      )))
+
+(pass2 "aAb")
 
 
 
@@ -60,13 +71,13 @@
                        1 first-reaction
                        2 (cons a (reaction-pass (cons b remaining))))))))))
 
-(reaction-pass "aAb")
+(pass "aAb")
 (reaction-pass "aaAb")
 
 ; (defn polymer-reaction [pstring]
 ;   (if (<= (count pstring) 1)
 ;     pstring
-;     (let [[u1 u2 & remaining :as all] pstring] 
+;     (let [[u1 u2 & remaining :as all] pstring]
 ;       (if (inverse-units? u1 u2)
 ;         (polymer-reaction remaining)
 ;         (polymer-reaction (cons u1 (polymer-reaction (rest all))))))))
