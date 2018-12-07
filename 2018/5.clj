@@ -23,24 +23,7 @@
 (= "aa" (react \a \a))
 (= "x" (react nil \x))
 
-
 (defn pass [polymer]
-  (let [processed (atom "")]
-    (loop [remaining polymer]
-      (if (empty? remaining)
-        @processed
-
-
-        (let [reacted (react (last @processed) (first remaining))]
-          (swap! processed str reacted)
-          (println remaining)
-          (recur (rest polymer))
-
-          ))
-      )
-    ))
-
-(defn pass2 [polymer]
   (loop [x (str (first polymer))
          remaining (rest polymer)]
     (println "x: " x " remaining: " remaining)
@@ -51,13 +34,12 @@
         (println "untouched:" untouched)
         (if (empty? product)
           (recur (str (butlast x) (first untouched)) (rest untouched) )
-          (recur (str x product) untouched)))
-      x
-      )))
+          (recur (str x (rest product)) untouched)))
+      x)))
 
-(pass2 "aAb")
-
-
+(pass "aAb")
+(pass "abBA")
+(pass "dabAcCaCBAcCcaDA") ; => dabCBAcaDA ?
 
 (defn reaction-pass [pstring]
   (apply str (if (empty? pstring)
@@ -93,6 +75,6 @@
 
 (polymer-reaction "aAb")
 (polymer-reaction "abBA")
-(polymer-reaction "dabAcCaCBAcCcaDA") ; => dabCBAcaDA ?
+(pass "dabAcCaCBAcCcaDA") ; => dabCBAcaDA ?
 
 (count (polymer-reaction input))
