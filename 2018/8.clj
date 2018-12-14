@@ -7,57 +7,78 @@
 (def input-lines (clojure.string/split-lines (slurp "inputs/8.txt")))
 (def input (parse-line (first input-lines)))
 
-(defn node [ccount mcount]
-  {:child-count ccount
-   :meta-count mcount })
+(def mkzip (partial z/zipper
+                    (fn [n] true)
+                    (fn [n] (n :children))
+                    (fn [n cs] (assoc n :children cs))))
 
-(defn children [loc]
-  (if (z/branch? loc)
-    (z/children loc)
-    '()))
+(defn mknode [ccount mcount]
+  {:child-count ccount
+   :meta-count mcount
+   :metadata []
+   :children []})
 
 (defn add-child [loc item]
-  (if (z/branch? loc)
-    (z/insert-child loc item)
-    (z/replace loc (z/make-node loc (z/node loc) (list item)))))
+  (z/insert-child loc item)
+  )
 
 (defn get-more-children [loc numbers]
   (let [[ccount mcount & remaining] numbers
-        node [ccount mcount '()]]
-    (println "more children")
-    [(add-child loc node) remaining]))
+        node (mknode ccount mcount)]
+    (println "--------")
+    (println "adding another child")
+    (println "assigning:" node)
+    (println "passing on:" remaining)
+    [(z/next (add-child loc node)) remaining]))
 
 (defn get-more-metadata [loc numbers]
-  (let [meta-count (second (z/node loc))
+  (let [meta-count ((z/node loc) :meta-count)
         metadatums (take meta-count numbers)
         remaining (nthrest numbers meta-count)]
+    (println "--------")
     (println "more metadata")
-    [(z/replace loc (assoc (z/node loc) 2 metadatums)) remaining]))
+    (println "assigning:" metadatums)
+    (println "passing on:" remaining)
+    [(z/replace loc (assoc (z/node loc) :metadata metadatums)) remaining]
+
+    ))
 
 (defn back-up [loc numbers]
-  (list (z/up loc) numbers))
+  [(z/up loc) numbers])
 
 (defn look-ahead [loc remaining]
-  (let [[child-count meta-count metadata] (z/node loc)]
+  (let [node (z/node loc)]
+    (println "--------")
     (println "look ahead")
-    (println "children:" (children loc))
-    (println "child-count:" child-count)
+    (println "")
+    (println "children:" (z/children loc))
+    (println "child-count:" (node :child-count))
+    ; (println (get-more-children loc remaining))
+    (println "")
+    (println "metadata:" (node :metadata))
+    (println "meta-count:" (node :meta-count))
+    ; (println (get-more-metadata loc remaining))
+
+    (println "backup:" (back-up loc remaining))
     (cond
-      (< (count (children loc)) child-count) (get-more-children loc remaining)
-      (< (count metadata) meta-count) (get-more-metadata loc remaining)
+      (< (count (z/children loc)) (node :child-count)) (get-more-children loc remaining)
+      (< (count (node :metadata)) (node :meta-count)) (get-more-metadata loc remaining)
       :else (back-up loc remaining))))
 
 
 (defn build-tree [numbers]
   (let [[root-children-count root-metadata-count & remaining] numbers
-        root-node (node root-children-count root-metadata-count)
-        loc (z/next)
-        loc (z/next (z/seq-zip (list [root-children-count root-metadata-count]))) ]
-    (loop [loc loc numbers remaining]
+         root-node (mknode root-children-count root-metadata-count)
+         loc' (mkzip root-node)]
+    (loop [loc loc' numbers remaining]
+      (println "#######################")
+      (println "another loop:")
       (println loc)
-      (if (z/end? loc)
+      (println numbers)
+      (if (or (z/end? loc) (empty? numbers))
         (z/root loc)
         (let [[loc' remaining'] (look-ahead loc numbers)]
+          (println "about to recur with:")
           (println loc')
           (println remaining')
           (recur loc' remaining'))))))
@@ -65,16 +86,10 @@
 
 (def test-nums1 '(2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2))
 
-(z/node  (z/next (z/seq-zip (list [2 3 []]))))
-
-(def foo (z/seq-zip (list [1] '( ([2] [3] [6]) ([4])))))
-(z/next foo)
-
 (build-tree test-nums1)
 
-(z/children (z/seq-zip '(1 (2 3))))
 
-(z/root (z/seq-zip '(:A (:B (:D) (:E)) (:C (:F)))))
-
-
-(z/children (z/next (z/seq-zip '(( [:a :b] [:x]) [:c :d]))))
+(println (cond
+  true "what"
+  true "ok"
+  ))
