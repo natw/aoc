@@ -45,20 +45,40 @@
 (defn back-up [loc numbers]
   [(z/up loc) numbers])
 
-(defn look-ahead [loc remaining]
+(defn look-ahead' [loc remaining]
   (let [node (z/node loc)]
     (cond
       (< (count (children loc)) (node :child-count)) (get-more-children loc remaining)
       (< (count (node :metadata)) (node :meta-count)) (get-more-metadata loc remaining)
       :else (back-up loc remaining))))
 
+(defn look-ahead [loc remaining]
+  (let [ret (look-ahead' loc remaining)
+        [loc' remaining'] ret ]
+    (if (nil? loc')
+      (do
+        (println "what the hell")
+        (println (back-up loc remaining))
+        
+        )
+      (do)
+      )
+    ret
+    ))
+
+(defn end? [l]
+  (if (nil? l)
+    (println (z/root l))
+    (z/end? l)
+    )
+  )
 
 (defn build-tree [numbers]
   (let [[root-children-count root-metadata-count & remaining] numbers
          root-node (mknode root-children-count root-metadata-count)
          loc' (mkzip root-node)]
     (loop [loc loc' numbers remaining]
-      (if (or (z/end? loc) (empty? numbers))
+      (if (or (end? loc) (empty? numbers))
         (z/root loc)
         (let [[loc' remaining'] (look-ahead loc numbers)]
           (recur loc' remaining'))))))
@@ -72,7 +92,28 @@
   (map z/node (take-while (complement z/end?) (iterate z/next loc))))
 
 (reduce + (map #(reduce + %) (map :metadata (nodes (mkzip (build-tree test-nums1))))))
-
 (reduce + (map #(reduce + %) (map :metadata (nodes (mkzip (build-tree input))))))
 
 
+(def tree (build-tree input))
+
+(defn node-value [n]
+  (if (nil? n)
+    0
+    (if (= 0 (count (n :children)))
+      (do 
+        (reduce + (n :metadata)))
+      (do
+        (reduce + (map node-value (map #(nth (reverse (n :children)) (dec %) nil) (n :metadata))))))))
+
+(node-value (first (nodes (mkzip (build-tree test-nums1)))))
+
+(node-value (first (nodes (mkzip (build-tree input)))))
+
+(-> input
+    build-tree
+    mkzip
+    nodes
+    first
+    node-value
+    )
