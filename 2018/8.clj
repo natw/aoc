@@ -110,10 +110,10 @@
 
 (node-value (first (nodes (mkzip (build-tree input)))))
 
-(-> input
+(println (-> input
     build-tree
     mkzip
     nodes
     first
     node-value
-    )
+    ))
