@@ -66,9 +66,14 @@
   (-> (surrounding coords)
       (filter #(unoccupied? cave actors %))))
 
-(defn take-turn [cave actors actor])
+; do a thing
+; return updated registry
+(defn take-turn [cave actors actor]
+  (if-let [adjacent-enemies (find-adjacent-enemies actor actors)]
+    (attack actor (first adjacent-enemies))
+    (move actor actors)))
 
-(defn tick [cave actor-registry]
+(defn do-round [cave actor-registry]
   (loop [registry actor-registry
          remaining-actors (vals (keyed-by-coords (vals actor-registry)))]
     (if (empty? remaining-actors)
