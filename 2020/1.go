@@ -10,6 +10,7 @@ import (
 func main() {
 	f, _ := os.Open("inputs/input1.txt")
 	lines := make([]int64, 0)
+	// asdf
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		i, _ := strconv.ParseInt(s.Text(), 10, 64)
