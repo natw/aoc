@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 )
 
@@ -29,7 +30,7 @@ func MapLines(fname string, regex string) []map[string]string {
 	return lines
 }
 
-func Max(nums ...int64) int64 {
+func MaxInts(nums ...int64) int64 {
 	if len(nums) == 2 {
 		x := nums[0]
 		y := nums[1]
@@ -38,10 +39,43 @@ func Max(nums ...int64) int64 {
 		}
 		return y
 	}
-	return Max(nums[0], Max(nums[1:]...))
+	return MaxInts(nums[0], MaxInts(nums[1:]...))
+}
+
+func MinTwo(nums ...int64) (a int64, b int64) {
+	sort.Slice(nums, func(i, j int) bool {
+		return nums[i] < nums[j]
+	})
+	a = nums[0]
+	b = nums[1]
+	return
 }
 
 func main() {
+	part2()
+}
+
+func part2() {
+	dims := MapLines("inputs/2.txt", `(?P<l>\d+)x(?P<w>\d+)x(?P<h>\d+)`)
+
+	var totalLength int64
+
+	for _, d := range dims {
+		fmt.Printf("%+v\n", d)
+
+		l, _ := strconv.ParseInt(d["l"], 10, 64)
+		w, _ := strconv.ParseInt(d["w"], 10, 64)
+		h, _ := strconv.ParseInt(d["h"], 10, 64)
+
+		s1, s2 := MinTwo(l, w, h)
+		r1 := 2*s1 + 2*s2
+		r2 := l * w * h
+		totalLength += r1
+		totalLength += r2
+	}
+	fmt.Println(totalLength)
+}
+func part1() {
 	dims := MapLines("inputs/2.txt", `(?P<l>\d+)x(?P<w>\d+)x(?P<h>\d+)`)
 
 	var totalArea int64
@@ -54,10 +88,9 @@ func main() {
 		h, _ := strconv.ParseInt(d["h"], 10, 64)
 
 		sa := (2 * l * w) + (2 * w * h) + (2 * h * l)
-		ss := l * w * h / Max(w, l, h)
+		ss := l * w * h / MaxInts(w, l, h)
 		totalArea += sa
 		totalArea += ss
 	}
 	fmt.Println(totalArea)
-
 }
