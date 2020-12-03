@@ -29,9 +29,19 @@ func main() {
 
 	theMap, height, width := buildMap(f)
 
-	c := treeCount(theMap, width, height, 3, 1)
+	c1 := treeCount(theMap, width, height, 1, 1)
+	c2 := treeCount(theMap, width, height, 3, 1)
+	c3 := treeCount(theMap, width, height, 5, 1)
+	c4 := treeCount(theMap, width, height, 7, 1)
+	c5 := treeCount(theMap, width, height, 1, 2)
 
-	fmt.Println(c)
+	fmt.Println(c1)
+	fmt.Println(c2)
+	fmt.Println(c3)
+	fmt.Println(c4)
+	fmt.Println(c5)
+
+	fmt.Println(c1 * c2 * c3 * c4 * c5)
 
 }
 
