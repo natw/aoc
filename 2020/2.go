@@ -6,7 +6,6 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -15,22 +14,30 @@ func main() {
 	re := regexp.MustCompile(`(\d+)-(\d+) ([a-z]): (\w+)`)
 	validCount := 0
 	var isValid bool
+	var a, b bool
 	for s.Scan() {
 		line := s.Text()
 		m := re.FindStringSubmatch(line)
-		fmt.Println(m[1:])
 
-		min, _ := strconv.ParseInt(m[1], 10, 64)
-		max, _ := strconv.ParseInt(m[2], 10, 64)
+		pos1, _ := strconv.ParseInt(m[1], 10, 64)
+		pos2, _ := strconv.ParseInt(m[2], 10, 64)
+		pos1--
+		pos2--
 		letter := m[3]
 		password := m[4]
 
 		isValid = false
 
-		count := int64(strings.Count(password, letter))
-		if count >= min && count <= max {
+		a = (password[pos1] == letter[0])
+		b = (password[pos2] == letter[0])
+		if xor(a, b) {
 			isValid = true
 		}
+
+		// count := int64(strings.Count(password, letter))
+		// if count >= min && count <= max {
+		// 	isValid = true
+		// }
 
 		if isValid {
 			validCount++
@@ -38,4 +45,8 @@ func main() {
 	}
 
 	fmt.Println(validCount)
+}
+
+func xor(a bool, b bool) bool {
+	return (a || b) && !(a && b)
 }
