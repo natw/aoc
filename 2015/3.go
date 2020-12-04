@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	part1()
+	// part1()
+	part2()
 }
 
 func part1() {
@@ -62,4 +63,54 @@ func work(inst string) {
 		}
 	}
 	fmt.Printf("visited %d houses, %d more than once\n", len(visited), ans)
+}
+
+func part2() {
+
+	f, _ := os.Open("inputs/3.txt")
+	r := bufio.NewReader(f)
+	inst, _ := r.ReadString('\n')
+	work2(inst)
+	// work2("^v^v^v^v^v")
+}
+func work2(inst string) {
+	fmt.Println("working")
+	var x, y int64
+
+	visited := make(map[point]int64)
+
+	santa := point{x, y}
+	robo := point{x, y}
+
+	visited[point{0, 0}] = 2
+
+	for i, step := range inst {
+		if i%2 == 1 {
+			switch step {
+			case '>':
+				santa.x++
+			case '<':
+				santa.x--
+			case '^':
+				santa.y++
+			case 'v':
+				santa.y--
+			}
+			visited[santa]++
+		} else {
+			switch step {
+			case '>':
+				robo.x++
+			case '<':
+				robo.x--
+			case '^':
+				robo.y++
+			case 'v':
+				robo.y--
+			}
+			visited[robo]++
+		}
+	}
+
+	fmt.Println(len(visited))
 }
