@@ -7,7 +7,26 @@ import (
 )
 
 func main() {
-	part1()
+	part2()
+}
+
+func part2() {
+	f, _ := os.Open("inputs/5.txt")
+	s := bufio.NewScanner(f)
+	var _, _, seatID int64
+	ids := make(map[int64]bool)
+	for s.Scan() {
+		line := s.Text()
+		_, _, seatID = work1(line)
+		ids[seatID] = true
+	}
+
+	for k := range ids {
+		if ids[k+1] == false && ids[k+2] == true {
+			fmt.Println(k + 1)
+		}
+	}
+
 }
 
 func part1() {
