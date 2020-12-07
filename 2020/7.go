@@ -12,7 +12,8 @@ import (
 func main() {
 	f, _ := os.Open("inputs/7.txt")
 	lines := getLines(f)
-	part1(lines)
+	// part1(lines)
+	part2(lines)
 }
 
 func getLines(f io.Reader) []string {
@@ -30,9 +31,8 @@ type containment struct {
 	Number int
 }
 
-func part1(lines []string) {
+func makeRules(lines []string) map[string][]containment {
 	rules := make(map[string][]containment)
-
 	for _, line := range lines {
 		parts := strings.Split(line, " bags contain ")
 		containerColor := parts[0]
@@ -47,6 +47,26 @@ func part1(lines []string) {
 			rules[containerColor] = append(rules[containerColor], cm)
 		}
 	}
+	return rules
+}
+
+func part2(lines []string) {
+	rules := makeRules(lines)
+
+	fmt.Println(countInnerBags(rules, "shiny gold"))
+}
+
+func countInnerBags(rules map[string][]containment, outerColor string) int {
+	count := 0
+	for _, cm := range rules[outerColor] {
+		innerCount := countInnerBags(rules, cm.Color)
+		count += cm.Number * (innerCount + 1)
+	}
+	return count
+}
+
+func part1(lines []string) {
+	rules := makeRules(lines)
 
 	// for k, v := range rules {
 	// 	fmt.Printf("%s - %+v\n", k, v)
