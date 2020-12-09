@@ -9,7 +9,11 @@ import (
 
 func main() {
 	f, _ := os.Open("inputs/9.txt")
+	preambleLen := 25
+
 	// f := strings.NewReader(ex1)
+	// preambleLen := 5
+
 	s := bufio.NewScanner(f)
 	var nums []int
 	for s.Scan() {
@@ -17,7 +21,55 @@ func main() {
 		n, _ := strconv.Atoi(line)
 		nums = append(nums, n)
 	}
-	part1(nums, 25)
+	firstInvalid := part1(nums, preambleLen)
+
+	part2(nums, firstInvalid)
+
+}
+
+func part2(nums []int, firstInvalid int) {
+	for i := range nums {
+		for windowLen := 1; windowLen < len(nums)-i; windowLen++ {
+			window := nums[i : windowLen+i]
+			sum := SumSlice(window)
+			if sum == firstInvalid {
+				fmt.Printf("sum(%+v) == %d\n", window, firstInvalid)
+				min := Min(window)
+				max := Max(window)
+				fmt.Printf("%d + %d = %d\n", min, max, min+max)
+				return
+			}
+
+		}
+	}
+}
+
+func Min(nums []int) int {
+	min := nums[0]
+	for _, n := range nums {
+		if n < min {
+			min = n
+		}
+	}
+	return min
+}
+
+func Max(nums []int) int {
+	max := nums[0]
+	for _, n := range nums {
+		if n > max {
+			max = n
+		}
+	}
+	return max
+}
+
+func SumSlice(nums []int) int {
+	sum := 0
+	for _, n := range nums {
+		sum += n
+	}
+	return sum
 }
 
 var ex1 = `35
@@ -41,14 +93,15 @@ var ex1 = `35
 309
 576`
 
-func part1(nums []int, preambleLen int) {
+func part1(nums []int, preambleLen int) int {
 	for i, n := range nums[preambleLen:] {
 		sums := getSums(nums[i : preambleLen+i])
 		if sums[n] == false {
 			fmt.Println(n)
-			return
+			return n
 		}
 	}
+	return 0
 }
 
 func getSums(nums []int) map[int]bool {
