@@ -21,11 +21,8 @@ L.LLLLL.LL`
 func main() {
 	f, _ := os.Open("inputs/11.txt")
 	// f := strings.NewReader(ex1)
-	part1(f)
+	part2(f)
 }
-
-var rowCount int
-var colCount int
 
 func part1(f io.Reader) {
 	layout := getLines(f)
@@ -44,16 +41,27 @@ func part1(f io.Reader) {
 		}
 		layout = newState
 	}
-	// for _, l := range layout {
-	// 	fmt.Printf("%c\n", l)
-	// }
-	// fmt.Println("")
+}
 
-	// n := tick1(layout)
-	// for _, l := range n {
-	// 	fmt.Printf("%c\n", l)
-	// }
+func part2(f io.Reader) {
+	layout := getLines(f)
 
+	i := 0
+	for {
+		newState := tick2(layout)
+		// fmt.Println("")
+		// for _, l := range newState {
+		// 	fmt.Printf("%c\n", l)
+		// }
+
+		if layoutEq(newState, layout) {
+			fmt.Println("stable")
+			fmt.Println(countOccupied(newState))
+			break
+		}
+		layout = newState
+		i++
+	}
 }
 
 func countOccupied(m [][]rune) int {
@@ -78,6 +86,25 @@ func layoutEq(a [][]rune, b [][]rune) bool {
 		}
 	}
 	return true
+}
+
+func tick2(layout [][]rune) [][]rune {
+	newState := [][]rune{}
+	for rowNum, row := range layout {
+		newRow := make([]rune, len(row), len(row))
+		for colNum, seat := range row {
+			visible := findOccupied(layout, rowNum, colNum)
+			if seat == 'L' && visible == 0 {
+				newRow[colNum] = '#'
+			} else if seat == '#' && visible >= 5 {
+				newRow[colNum] = 'L'
+			} else {
+				newRow[colNum] = seat
+			}
+		}
+		newState = append(newState, newRow)
+	}
+	return newState
 }
 
 func tick1(layout [][]rune) [][]rune {
@@ -117,6 +144,39 @@ func copyLayout(layout [][]rune) [][]rune {
 		n = append(n, nr)
 	}
 	return n
+}
+func findOccupied(layout [][]rune, rowNum int, colNum int) int {
+	count := 0
+	cs := [][]int{
+		{-1, -1},
+		{-1, 0},
+		{-1, 1},
+		{0, -1},
+		{0, 1},
+		{1, -1},
+		{1, 0},
+		{1, 1},
+	}
+	for _, dir := range cs {
+		keepGoing := true
+		i := 1
+		for keepGoing {
+			r := rowNum + (dir[0] * i)
+			c := colNum + (dir[1] * i)
+			if r < 0 || r > len(layout)-1 {
+				keepGoing = false
+			} else if c < 0 || c > len(layout[0])-1 {
+				keepGoing = false
+			} else if layout[r][c] == '#' {
+				count++
+				keepGoing = false
+			} else if layout[r][c] == 'L' {
+				keepGoing = false
+			}
+			i++
+		}
+	}
+	return count
 }
 
 func getSurrounding(layout [][]rune, rowNum int, colNum int) []rune {
