@@ -10,8 +10,16 @@ import (
 
 func main() {
 	f, _ := os.Open("inputs/12.txt")
-	part1(f)
+	// f := strings.NewReader(ex1)
+	// part1(f)
+	part2(f)
 }
+
+var ex1 = `F10
+N3
+F7
+R90
+F11`
 
 var dirIndex = map[rune]int{
 	'N': 0,
@@ -26,6 +34,54 @@ var directions = [][]int{
 	{-1, 0}, // west = 3
 }
 
+func part2(f io.Reader) {
+	shipLocation := []int{0, 0}
+	waypointDiff := []int{10, 1}
+
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		line := s.Text()
+		cmd, val := parse(line)
+
+		fmt.Printf("shipLocation: (%d, %d)  waypointDiff: (%d, %d)\n", shipLocation[0], shipLocation[1], waypointDiff[0], waypointDiff[1])
+		switch cmd {
+		case 'F': // move ship to waypoint val times
+			diffX := waypointDiff[0] * val
+			diffY := waypointDiff[1] * val
+			shipLocation[0] += diffX
+			shipLocation[1] += diffY
+		case 'R': // turn right. I'm assuming all vals are multiples of 90
+			steps := int(val / 90)
+			for steps > 0 {
+				x := waypointDiff[0]
+				y := waypointDiff[1]
+				waypointDiff = []int{y, -x}
+				steps--
+			}
+		case 'L': // turn left
+			steps := int(val / 90)
+			for steps > 0 {
+				x := waypointDiff[0]
+				y := waypointDiff[1]
+				waypointDiff = []int{-y, x}
+				steps--
+			}
+		case 'N':
+			waypointDiff[1] += val
+		case 'E':
+			waypointDiff[0] += val
+		case 'S':
+			waypointDiff[1] -= val
+		case 'W':
+			waypointDiff[0] -= val
+		}
+
+	}
+
+	fmt.Printf("ending shipLocation: (%d, %d)\n", shipLocation[0], shipLocation[1])
+	fmt.Printf("manhattan distance: %d\n", abs(shipLocation[0])+abs(shipLocation[1]))
+
+}
 func part1(f io.Reader) {
 	currentDirection := 1
 	location := []int{0, 0}
