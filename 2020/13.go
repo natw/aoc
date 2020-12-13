@@ -14,9 +14,22 @@ const ex12 = "7,13,x,x,59,x,31,19"
 
 func main() {
 	// part1(ex11, splitService(ex12)) // 295
-	part1(earliest, splitService(inService))
+	// part1(earliest, splitService(inService))
+	// part2(split(ex12)) //1068781
+	part2(split(inService))
 }
 
+func split(line string) (ids []int) {
+	parts := strings.Split(line, ",")
+	for _, part := range parts {
+		if part == "x" {
+			part = "0"
+		}
+		id, _ := strconv.Atoi(part)
+		ids = append(ids, id)
+	}
+	return
+}
 func splitService(line string) (ids []int) {
 	parts := strings.Split(line, ",")
 	for _, part := range parts {
@@ -26,6 +39,29 @@ func splitService(line string) (ids []int) {
 		}
 	}
 	return
+}
+
+func part2(ids []int) {
+	for i := 1; i >= 0; i++ {
+		n := i * ids[0]
+		if foundIt(n, ids) {
+			fmt.Println("got it")
+			fmt.Println(n)
+			return
+		}
+	}
+}
+
+func foundIt(start int, ids []int) bool {
+	for i, check := range ids {
+		if check == 0 {
+			continue
+		}
+		if (start+i)%check != 0 {
+			return false
+		}
+	}
+	return true
 }
 
 func part1(earliest int, inService []int) {
