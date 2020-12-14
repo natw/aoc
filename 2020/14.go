@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,9 +23,10 @@ mem[26] = 1
 
 func main() {
 	// part1(strings.NewReader(ex1))
-	// f, _ := os.Open("inputs/14.txt")
+	f, _ := os.Open("inputs/14.txt")
 	// part1(f)
-	part2(strings.NewReader(ex2))
+	// part2(strings.NewReader(ex2))
+	part2(f)
 }
 
 func part1(f io.Reader) {
@@ -85,9 +87,9 @@ func part2(f io.Reader) {
 			locString := matches[0][0]
 			dataDec, _ := strconv.ParseInt(matches[1][0], 10, 64)
 			locs := generateLocations(mask, locString)
-			fmt.Printf("data: %d\n", dataDec)
+			// fmt.Printf("data: %d\n", dataDec)
 			for _, loc := range locs {
-				fmt.Printf("location: %d\n", loc)
+				// fmt.Printf("location: %d\n", loc)
 				memory[loc] = dataDec
 			}
 		}
@@ -132,28 +134,26 @@ func generateLocations(mask string, locDecString string) []int64 {
 		}
 	}
 
-	fmt.Printf("X at locations: %+v\n", exes)
+	// fmt.Printf("X at locations: %+v\n", exes)
 
 	possibilities := []string{}
-	for i := 1; i <= 1<<len(exes)-1; i++ {
+	for i := 0; i <= 1<<len(exes)-1; i++ {
 		possibilities = append(possibilities, fmt.Sprintf("%*.*b", len(exes), len(exes), i))
 	}
 
 	fmt.Println("location masks:")
 	fmt.Println(possibilities)
 
+	fmt.Println("X locations")
+	fmt.Println(exes)
 	for _, poss := range possibilities {
 		l := []byte(semiMasked)
-		fmt.Printf("before applying loc mask: %c\n", l)
 		for i, xLoc := range exes {
-			l := []byte(semiMasked)
-			fmt.Printf("X %d at location %d, set to %c\n", i, xLoc, rune(poss[i]))
+			// fmt.Printf("X %d at location %02d, set to %c\n", i, xLoc, rune(poss[i]))
 			l[xLoc] = poss[i]
-			// fmt.Printf("loc: %+v\n", l)
-			l2, _ := strconv.ParseInt(string(l), 2, 64)
-			fmt.Printf("got location: %36.36b\n", l2)
-			locs = append(locs, l2)
 		}
+		l2, _ := strconv.ParseInt(string(l), 2, 64)
+		locs = append(locs, l2)
 	}
 
 	return locs
