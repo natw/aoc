@@ -6,14 +6,12 @@ var input = []int{1, 12, 0, 20, 8, 16}
 
 func main() {
 
-	fmt.Println("expect 436:")
-	part1v2(ex0)
-	fmt.Println("expect 1:")
-	part1v2(ex1)
-	fmt.Println("expect 10:")
-	part1v2(ex2)
+	fmt.Println("expect 175594:")
+	part2(ex0)
+	fmt.Println("expect 2578:")
+	part2(ex1)
 
-	part1v2(input)
+	part2(input)
 }
 
 var ex0 = []int{0, 3, 6} // 2020th = 436
@@ -49,6 +47,35 @@ func part1v2(input []int) {
 		lastSaid = say
 		if turn == 2020 {
 			fmt.Printf("[%04d] said = %d\n", turn, say)
+		}
+	}
+}
+func part2(input []int) {
+	spoken := make(map[int][]int)
+	var lastSaid int
+	turn := 0
+
+	for _, num := range input {
+		turn++
+		spoken[num] = append(spoken[num], turn)
+		lastSaid = num
+	}
+
+	var say int
+
+	for {
+		turn++
+		if len(spoken[lastSaid]) == 1 { // last time was the first time
+			say = 0
+		} else {
+			turns := spoken[lastSaid]
+			say = turns[len(turns)-1] - turns[len(turns)-2]
+		}
+		spoken[say] = append(spoken[say], turn)
+		lastSaid = say
+		if turn == 30000000 {
+			fmt.Printf("[%04d] said = %d\n", turn, say)
+			return
 		}
 	}
 }
