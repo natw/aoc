@@ -16,7 +16,69 @@ EX13 = %Q{ 7,3,47
 
 def main
   # part1(EX11, EX12, EX13)
-  part1(INPUT1, INPUT2, INPUT3)
+  # part1(INPUT1, INPUT2, INPUT3)
+  part2(INPUT1, INPUT2, INPUT3)
+end
+
+def part2(rulelines, mine, nearby)
+  rules = rulelines.split("\n").compact.map { |line|
+    m = /(.+): (\d+)-(\d+) or (\d+)-(\d+)/.match(line)
+    next if m.nil?
+    {
+      name: m[1],
+      pred: proc { |n|
+        (n >= m[2].to_i && n <= m[3].to_i) || (n >= m[4].to_i && n <= m[5].to_i)
+      }
+    }
+  }.compact
+
+  tickets = nearby.split("\n").compact.map { |line|
+    line.split(",").map(&:to_i)
+  }
+
+  good = tickets.reject { |t|
+    t.any? { |n|
+      rules.all? { |rule|
+        !rule[:pred].call(n)
+      }
+    }
+  }.reject{ |x| x.empty? }
+
+  names = good.transpose.map { |group|
+    rules.select{|r| group.all? { |n| r[:pred].call(n) } }.map{ |r| r[:name] }
+  }
+
+  10.times {
+      names.each { |fields|
+        if fields.length == 1
+          x = fields[0]
+          names.each { |f|
+            if f.length != 1
+              f.delete(x)
+            end
+          }
+        end
+      }
+  }
+  names.each { |x|
+    p x
+  }
+
+  myticket = mine.split(",").map(&:to_i)
+
+  ans = names.each_with_index.map { |x, i|
+    if x[0] =~ /^departure/
+      myticket[i]
+    else
+      1
+    end
+  }.reduce(:*)
+
+  p ans
+
+
+
+
 end
 
 def part1(rulelines, myticket, nearby)
