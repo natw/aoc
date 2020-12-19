@@ -15,8 +15,8 @@ var ex3 = `5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))`       // 12240
 var ex4 = `((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2` // 13632
 
 func main() {
-	f, _ := os.Open("inputs/18.txt")
-	part1(f)
+	// f, _ := os.Open("inputs/18.txt")
+	// part1(f)
 	// fmt.Println("26:")
 	// part1(strings.NewReader(ex1))
 	// fmt.Println("437:")
@@ -25,6 +25,28 @@ func main() {
 	// part1(strings.NewReader(ex3))
 	// fmt.Println("13632:")
 	// part1(strings.NewReader(ex4))
+
+	fmt.Println("46:")
+	part2(strings.NewReader(ex1))
+	fmt.Println("1445:")
+	part2(strings.NewReader(ex2))
+	fmt.Println("669060:")
+	part2(strings.NewReader(ex3))
+	fmt.Println("23340:")
+	part2(strings.NewReader(ex4))
+
+	f, _ := os.Open("inputs/18.txt")
+	part2(f)
+}
+
+func part2(f io.Reader) {
+	s := bufio.NewScanner(f)
+	total := 0
+	for s.Scan() {
+		line := s.Text()
+		total += calc2(line)
+	}
+	fmt.Println(total)
 }
 
 func part1(f io.Reader) {
@@ -32,7 +54,7 @@ func part1(f io.Reader) {
 	total := 0
 	for s.Scan() {
 		line := s.Text()
-		total += calc2(line)
+		total += calc1(line)
 	}
 	fmt.Println(total)
 }
@@ -43,6 +65,44 @@ func add(a int, b int) int {
 
 func multiply(a int, b int) int {
 	return a * b
+}
+func justOps2(line string) int {
+	parts := strings.Split(line, " ")
+
+	i := 0
+	for {
+		if i >= len(parts) {
+			break
+		}
+		p := parts[i]
+		if p == "+" {
+			a, _ := strconv.Atoi(parts[i-1])
+			b, _ := strconv.Atoi(parts[i+1])
+			ps := append(parts[:i-1], fmt.Sprintf("%d", a+b))
+			parts = append(ps, parts[i+2:]...)
+
+		} else {
+			i++
+		}
+	}
+
+	var op = add
+	total := 0
+	// fmt.Printf("just ops: %v\n", parts)
+	for _, c := range parts {
+		switch c {
+		case "+":
+			op = add
+		case "*":
+			op = multiply
+		default:
+			// fmt.Printf("num: %s\n", c)
+			i, _ := strconv.Atoi(c)
+			total = op(total, i)
+			// fmt.Printf("new total: %d\n", total)
+		}
+	}
+	return total
 }
 func justOps(line string) int {
 	var op = add
@@ -76,46 +136,18 @@ func calc2(line string) int {
 		innerPart := line[start+1 : end]
 		line = fmt.Sprintf("%s%d%s", line[:start], calc2(innerPart), line[end+1:])
 	}
-	return justOps(line)
+	return justOps2(line)
 }
 func calc1(line string) int {
-	// fmt.Printf("line: %s\n", line)
-	var op = add
-	total := 0
-	inner := false
-	i := 0
-	for i < len(line) {
-		c := line[i]
-		i++
-		switch c {
-		case ' ':
-			continue
-		case '(':
-			// fmt.Println("start paren")
-
-			total = op(total, calc1(line[i+1:]))
-			// fmt.Printf("total: %d\n", total)
-			inner = true
-		case ')':
-			// fmt.Println("end paren")
-			if inner {
-				// fmt.Printf("returning subtotal: %d\n", total)
-				return total
-			} else {
-				inner = false
-			}
-		case '+':
-			// fmt.Println("plus")
-			op = add
-		case '*':
-			// fmt.Println("mult")
-			op = multiply
-		default:
-			// fmt.Printf("num: %c\n", c)
-			i, _ := strconv.Atoi(string(c))
-			total = op(total, i)
-			// fmt.Printf("total: %d\n", total)
+	for {
+		start := strings.LastIndex(line, "(")
+		if start == -1 {
+			// fmt.Printf("breaking: %s\n", line)
+			break
 		}
+		end := strings.Index(line[start:], ")") + start
+		innerPart := line[start+1 : end]
+		line = fmt.Sprintf("%s%d%s", line[:start], calc1(innerPart), line[end+1:])
 	}
-	return total
+	return justOps(line)
 }

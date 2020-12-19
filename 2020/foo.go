@@ -2,14 +2,10 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 func main() {
-	a := "012((hi)7)8"
-	b := strings.LastIndex(a, "(")
-	e := strings.Index(a, ")")
-	fmt.Println(a[b : e+1])
-	a = a[:b] + "poop" + a[e+1:]
-	fmt.Println(a)
+	a := []int{1, 2, 3, 4, 5}
+	i := 2
+	fmt.Printf("%v\n", append(a[:i-1], a[i+2:]...))
 }
