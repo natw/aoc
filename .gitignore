@@ -16,3 +16,5 @@ target/
 .lein-repl-history
 .nrepl-history
 .nrepl-port
+.lsp/
+.clj-kondo/
