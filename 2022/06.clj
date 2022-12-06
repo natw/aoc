@@ -30,4 +30,20 @@
 (part2 test1)
 (part2 test2)
 
-(part2 input)
+(part2 input) ; 2851
+
+; refactor
+
+(defn part-maker [window-size]
+  (fn [signal]
+    (let [windows (partition window-size 1 signal)
+          indexer (fn [i,s] (list (+ i window-size) s))
+          iwindows (map-indexed indexer windows)
+          all-uniq (fn [[i s]] (= (count s) (count (distinct s))))]
+      (first (first (filter all-uniq iwindows))))))
+
+(def part1' (part-maker 4))
+(part1' input) ; 1794
+
+(def part2' (part-maker 14))
+(part2' input) ; 2851
