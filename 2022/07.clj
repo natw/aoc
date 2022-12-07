@@ -177,3 +177,20 @@
 (part1 test1)
 
 (part1 lines)
+
+(def total-space 70000000)
+(def total-needed 30000000)
+(def target-usage (- total-space total-needed))
+
+(defn part2 [lines]
+  (let [tree (build-dir-tree lines)
+        dirs (dirs tree)
+        dir-nodes (map zip/node dirs)
+        sizes (map total-node-size dir-nodes)
+        used (total-node-size (zip/node tree))
+        enough? (fn [size] (<= (- used size) target-usage))
+        big-enough (filter enough? sizes)
+        sorted (sort big-enough)]
+    (first sorted)))
+
+(part2 lines)
