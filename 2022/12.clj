@@ -19,8 +19,6 @@
 (def test2 '("SbcdefghijklmnopqrstuvwxyE"
              "aazzzzzzzzzzzzzzzzzzzzaaaa"))
 
-
-
 (defn make-topo [lines]
   (to-array-2d (map (fn [row] (map int row)) lines)))
 
@@ -33,65 +31,66 @@
       (= h (int \E)) (int \z)
       :else h)))
 
-
 (defn all-neighbors [topo pos]
   (let [[r c] pos
         points (list [(inc r) c]
-                   [(dec r) c]
-                   [r (inc c)]
-                   [r (dec c)])]
+                     [(dec r) c]
+                     [r (inc c)]
+                     [r (dec c)])]
     (filter (fn [[r c]] (and (not (neg? r))
                              (not (neg? c))
                              (not (= [r c] pos))
                              (< r (count topo))
                              (< c (count (first topo))))) points)))
 
-(all-neighbors topo [0 0])
-
 (defn steppable? [topo pos1 pos2]
   (let [h1 (get-height topo pos1)
         h2 (get-height topo pos2)]
-    (<= (abs (- h1 h2)) 1)))
+    (<= (- h2 h1) 1)))
 
 (all-neighbors topo test-start)
 
 (defn is-end? [topo pos]
   (= (int \E) (apply (partial aget topo) pos)))
 
+(defn steppable-neighbors [topo pos]
+  (->> (all-neighbors topo pos)
+       (filter #(steppable? topo pos %))
+       (vec)))
 
-(let [iters (atom 0)
-      cache (atom {})
-      visited (atom #{})]
+(defn get-distance [topo pos]
+  (loop [seen #{pos}
+         queue [[0 pos]]]
+    (let [[dist current] (first queue)]
+      (if (or (nil? current) (is-end? topo current))
+        dist
+        (let [nbrs (remove seen (steppable-neighbors topo current))
+              costed-nbrs (map #(vector (inc dist) %) nbrs)]
+            (recur (reduce conj seen nbrs)
+                  (reduce conj (vec (rest queue)) costed-nbrs)))))))
 
-  (defn steppable-neighbors [topo pos]
-    (->> (all-neighbors topo pos)
-        (filter #(steppable? topo pos %))
-        (filter #(not (contains? @visited %)))))
+(defn part1 [lines start]
+  (let [topo (make-topo lines)]
+    (get-distance topo start)))
 
-  (defn get-distance [topo pos]
-    (swap! iters inc)
-    (swap! visited conj pos)
-    (println "getting distance" @iters)
-    (if (is-end? topo pos)
-      0
-      (if-some [cached-dist (get @cache pos)]
-        (do
-          ; (println "had cached dist for" pos)
-          cached-dist)
-        (let [nbrs (steppable-neighbors topo pos)
-              ; _ (println nbrs)
-              f (fn [p] (get-distance topo p))
-              nbr-dists (map f nbrs)
-              min-step (if (empty? nbr-dists) Integer/MAX_VALUE (apply min nbr-dists))
-              this-dist (inc min-step)]
-          (swap! cache assoc pos this-dist)
-          this-dist))))
+; (part1 test1 test-start)
+(part1 lines start)
 
-  (defn part1 [lines start]
-    (let [topo (make-topo lines)]
-      (get-distance topo start)))
+; part 2
 
-  ; (part1 test2 test-start))
-  (part1 test1 test-start))
+(defn a-positions [topo]
+  (for [row (range (count topo))
+        col (range (count (first topo)))
+        :let [pos (vector row col)]
+        :when (= (int \a) (get-height topo pos))]
+    pos))
 
-  ; (part1 lines start))
+(defn part2 [lines]
+  (let [topo (make-topo lines)
+        as (a-positions topo)]
+    (->> as
+         (map #(get-distance topo %))
+         (remove nil?)
+         (apply min))))
+
+(part2 lines)
