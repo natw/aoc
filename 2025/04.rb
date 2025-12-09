@@ -60,3 +60,34 @@ part1(t1)
 input1 = parse_input(File.new("inputs/04.txt").read)
 puts input1[-1].inspect
 part1(input1)
+
+def part2(room)
+  keep_going = true
+  height = room.length
+  width = room[0].length
+  total = 0
+  while keep_going
+    to_remove = []
+    (0...height).each { |y|
+      (0...width).each { |x|
+        if room[y][x] == "@"
+          c = surrounding(room, y, x).tally["@"] || 0
+          if c < 4
+            to_remove << [y,x]
+          end
+        end
+      }
+    }
+    to_remove.each { |y,x|
+      room[y][x] = "."
+    }
+    total += to_remove.length
+    if to_remove.length == 0
+      keep_going = false
+    end
+  end
+  puts total
+end
+
+part2(t1)
+part2(input1)
